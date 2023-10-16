@@ -47,3 +47,26 @@ valid_set = PedesAttrUPAR(cfg=cfg, csv_file='/data3/doanhbc/upar/annotations/pha
 ```
 bash run.sh
 ```
+
+Weights would be saved under the folder `exp_results/swin_b*/*.pth`
+
+## Inference
+
+Before inference, change the ckpt path at line:
+
+```
+(76) model = get_reload_weight(model_dir, model, pth='/home/compu/doanhbc/upar_challenge/SOLIDER-PersonAttributeRecognition/exp_result/PA100k/swin_b.sm08/img_model/best_ckpt_max_2023-10-15_10:55:57.pth')
+```
+
+and paths of datasets at:
+
+```
+(50) valid_set = PedesAttrUPARInferTestPhase(cfg=cfg, csv_file='/data3/doanhbc/upar/phase2/submission_templates_test/task1/predictions.csv', transform=valid_tsfm,
+                              root_path='/data3/doanhbc/upar/phase2/', target_transform=cfg.DATASET.TARGETTRANSFORM)
+```
+
+in file `infer_upar_test_phase.py`
+
+```
+python infer_upar_test_phase.py
+```
