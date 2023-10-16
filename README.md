@@ -2,12 +2,23 @@
 
 ## Download dataset
 
+Train & dev-test sets:
 ```
 git clone https://github.com/speckean/upar_challenge
 ```
 
 ```
 python download_datasets.py
+```
+
+Test set & dev-test annotations:
+
+```
+gdown --id 1eJKKvWenl6aQE76D0j0asf3YVthVvqpq
+```
+```
+7z -x phase2.zip
+password: UVk4yayzy38zEMKH
 ```
 
 ## Download pretrained models (ImageNet)
