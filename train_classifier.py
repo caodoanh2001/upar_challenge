@@ -275,12 +275,6 @@ def trainer(cfg, args, epoch, model, model_ema, train_loader, valid_loader, crit
     model.module.classifier.logits[0].weight.requires_grad = True
     model.module.classifier.logits[0].bias.requires_grad = True
 
-    model.module.classifier.logits2[0].weight.requires_grad = True
-    model.module.classifier.logits2[0].bias.requires_grad = True
-
-    model.module.classifier.logits3[0].weight.requires_grad = True
-    model.module.classifier.logits3[0].bias.requires_grad = True
-
     for e in range(epoch):
 
         if args.distributed:
