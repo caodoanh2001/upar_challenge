@@ -1,4 +1,4 @@
-## Channel-Aware Cross-Fused Transformer-style Networks (C$^2$T-Net)
+## Channel-Aware Cross-Fused Transformer-style Networks
 
 Doanh C. Bui, Thinh V. Le and Hung Ba Ngo
 
