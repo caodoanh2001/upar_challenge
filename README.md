@@ -1,59 +1,54 @@
-## Channel-Aware Cross-Fused Transformer-style Networks
+## Channel-Aware Cross-Fused Transformer-style Networks (C$^2$T-Net)
 
 Doanh C. Bui, Thinh V. Le and Hung Ba Ngo
 
 ### 1. Prepare the dataset from UPAR challenge
 
-Clone the dataset repository from UPAR organizer
+Follow the instruction of data download of organizer [website](https://github.com/speckean/upar_challenge).
+
+The data should be arranged as below tree directory:
 
 ```
-git clone https://github.com/speckean/upar_challenge
+data
+├── phase1
+│   ├── annotations
+│   ├── Market1501
+│   ├── market_1501.zip
+│   ├── PA100k
+│   └── PETA
+├── phase2
+│   ├── annotations
+│   ├── MEVID
+│   └── submission_templates_test
 ```
 
-Download datasets for phase 1:
+### 2. Prepare docker image
+
+Download docker image [here](https://).
+
+Run the below command to load the docker image:
 
 ```
-python download_datasets.py
+sudo docker load < upar_hdt.tar
 ```
 
-Downlaod datasets for phase 2 (using `gdown`):
+Go into the `data` folder, run below command to create a container
 
 ```
-gdown --id 1eJKKvWenl6aQE76D0j0asf3YVthVvqpq
+sudo docker run -d --shm-size 8G --gpus="all" -it --name upar_hdt --mount type=bind,source="$(pwd)",target=/home/data upar_hdt:v0
 ```
 
-Datasets for phase 2 are encrypted, hence, should use decryption key to unzip:
+Run the container
 
 ```
-7z x phase2.zip
+sudo docker exec -ti upar_hdt /bin/bash
 ```
 
-Key: `UVk4yayzy38zEMKH`
+Then, follow the step 3 for reproducing the results, and step 4 for training.
 
-Phase 1 dataset structure:
+### 3. Inference for testing dataset in phase 2:
 
-```
-phase1
-|__annotations
-|__Market1501
-|__PA100k
-|__annotations
-```
-
-Phase 2 dataset structure:
-
-```
-phase2
-|__annotations
-|__MEVID
-|__submission_templates_test
-```
-
-Modify the `DATASET.PHASE1_ROOT_PATH` and `DATASET.PHASE2_ROOT_PATH` in config file `configs/upar.yaml`
-
-### 2. Inference for testing dataset in phase 2:
-
-Download our best checkpoint [here](https://) (`best_model.pth`). Place it under `checkpoints` folder.
+Download our best checkpoint [here](https://) (`best_model.pth`). Place it under `checkpoints` folder (we already put it in the docker image).
 
 Run the below file for inference:
 
@@ -66,4 +61,10 @@ The results are written in `predictions.csv` file. This file is valid for submis
 
 ### 3. Training model
 
-We are updating.
+Run the below command for training:
+
+```
+CUDA_VISIBLE_DEVICES=0 bash run.sh
+```
+
+The checkpoints and logs would be saved at `exp_results/upar/`
