@@ -24,6 +24,17 @@ import collections.abc
 from einops import rearrange
 from models.registry import BACKBONE
 import timm
+from timm.models.vision_transformer import Block
+
+class SaveOutput:
+    def __init__(self):
+        self.outputs = []
+    
+    def __call__(self, module, module_in, module_out):
+        self.outputs.append(module_out)
+    
+    def clear(self):
+        self.outputs = []
 
 class Identity(nn.Module):
     def __init__(self):
@@ -988,7 +999,37 @@ class SwinBlock(BaseModule):
 
         return x
 
+class CrossAttention(nn.Module):
+    def __init__(self, dim, num_heads=8, qkv_bias=False, qk_scale=None, attn_drop=0., proj_drop=0.):
+        super().__init__()
+        self.num_heads = num_heads
+        head_dim = dim // num_heads
+        # NOTE scale factor was wrong in my original version, can set manually to be compat with prev weights
+        self.scale = qk_scale or head_dim ** -0.5
 
+        self.wq = nn.Linear(dim, dim, bias=qkv_bias)
+        self.wk = nn.Linear(dim, dim, bias=qkv_bias)
+        self.wv = nn.Linear(dim, dim, bias=qkv_bias)
+        self.attn_drop = nn.Dropout(attn_drop)
+        self.proj = nn.Linear(dim, dim)
+        self.proj_drop = nn.Dropout(proj_drop)
+
+    def forward(self, x):
+
+        B, N, C = x.shape
+        q = self.wq(x[:, 0:1, ...]).reshape(B, 1, self.num_heads, C // self.num_heads).permute(0, 2, 1, 3)  # B1C -> B1H(C/H) -> BH1(C/H)
+        k = self.wk(x).reshape(B, N, self.num_heads, C // self.num_heads).permute(0, 2, 1, 3)  # BNC -> BNH(C/H) -> BHN(C/H)
+        v = self.wv(x).reshape(B, N, self.num_heads, C // self.num_heads).permute(0, 2, 1, 3)  # BNC -> BNH(C/H) -> BHN(C/H)
+
+        attn = (q @ k.transpose(-2, -1)) * self.scale  # BH1(C/H) @ BH(C/H)N -> BH1N
+        attn = attn.softmax(dim=-1)
+        attn = self.attn_drop(attn)
+
+        x = (attn @ v).transpose(1, 2).reshape(B, 1, C)   # (BH1N @ BHN(C/H)) -> BH1(C/H) -> B1H(C/H) -> B1C
+        x = self.proj(x)
+        x = self.proj_drop(x)
+        return x
+    
 class SwinBlockSequence(BaseModule):
     """Implements one stage in Swin Transformer.
     Args:
@@ -1272,37 +1313,25 @@ class SwinTransformer(BaseModule):
             layer_name = f'norm{i}'
             self.add_module(layer_name, layer)
 
-<<<<<<< HEAD
         self.vit = timm.create_model('eva_large_patch14_196.in22k_ft_in1k', img_size=(256, 128), pretrained=True, num_classes=0)
-        
         self.norm_1 = nn.LayerNorm(1024)
         self.norm_2 = nn.LayerNorm(1024)
         self.pool = nn.AdaptiveAvgPool2d(1)
 
-=======
-        # Vision Transformer
-        vit = timm.create_model('vit_large_r50_s32_384', pretrained=True)
-        self.vit_blocks = nn.ModuleList([*vit.blocks][-3:])
-        
-        # RegNet
-        self.regnet = timm.create_model('regnety_320.swag_ft_in1k', pretrained=True, num_classes=0)
-        self.regnet.head = Identity()
-        self.reg_conv = nn.Conv2d(3712, 1024, 1, 1, 0)
-        self.fused_skp = nn.Conv2d(3712 + 1024, 1024, 1, 1, 0)
-        
->>>>>>> ba6ce9aa78f1ce5d1680af52e2bd8d4b1be62ae9
         self.tablocks = nn.ModuleList()
         hw_shapes = [64 * 32, 32 * 16, 16 * 8, 8 * 4]
         for i in range(len(self.stages)):
             tab = TABlock(hw_shapes[i])
             self.tablocks.append(tab)
-<<<<<<< HEAD
-            
-=======
->>>>>>> ba6ce9aa78f1ce5d1680af52e2bd8d4b1be62ae9
+
+        self.cross_att_eva_swin = CrossAttention(dim=1024)
+        self.cross_att_swin_eva = CrossAttention(dim=1024)
 
         self.init_weights(pretrained)
 
+    def extract_full_tokens(self, save_output):
+        return save_output.outputs[-1]
+    
     def train(self, mode=True):
         """Convert the model into training mode while keep layers freezed."""
         super(SwinTransformer, self).train(mode)
@@ -1402,15 +1431,12 @@ class SwinTransformer(BaseModule):
                         nH2, L2).permute(1, 0).contiguous()
 
             res = self.load_state_dict(state_dict, False)
-            print('unloaded parameters:', res)
+            # print('unloaded parameters:', res)
 
     def forward(self, x, semantic_weight=None):
-<<<<<<< HEAD
-        # out1 = self.cnn_model(x)
-        out1 = self.vit(x)
-=======
-        x1 = self.regnet(x)
->>>>>>> ba6ce9aa78f1ce5d1680af52e2bd8d4b1be62ae9
+        # out1 = self.vit(x)
+        eva_outs = self.vit.forward_features(x)
+
         x, hw_shape = self.patch_embed(x)
 
         if self.use_abs_pos_embed:
@@ -1428,25 +1454,18 @@ class SwinTransformer(BaseModule):
                 out = out.view(-1, *out_hw_shape,
                                self.num_features[i]).permute(0, 3, 1,
                                                              2).contiguous()
-<<<<<<< HEAD
-        
 
-        out = self.norm_1(self.pool(out).view(out.size(0), -1))
+        out1 = eva_outs[:, 0].unsqueeze(1) + self.cross_att_eva_swin(torch.cat([eva_outs[:, 0].unsqueeze(1), rearrange(out, 'b c h w -> b (h w) c', h=hw_shape[0], w=hw_shape[-1])], dim=1))
+        out1 = out1.squeeze(1)
+
+        out = self.pool(out).view(out.size(0), -1)
+        out = out.unsqueeze(1) + self.cross_att_swin_eva(torch.cat([out.unsqueeze(1), eva_outs[:, 1:]], dim=1))
+        out = out.squeeze(1)
+        
+        out = self.norm_1(out)
         out1 = self.norm_2(out1)
 
         return torch.cat([out, out1], dim=-1)
-=======
-        out1 = self.reg_conv(x1)
-        out = out + out1        
-
-        out = rearrange(out, 'b c h w -> b (h w) c', h=hw_shape[0], w=hw_shape[-1])
-        for block in self.vit_blocks:
-            out = block(out)
-        out = rearrange(out, 'b (h w) c -> b c h w', h=hw_shape[0], w=hw_shape[-1])   
-        
-        out = self.fused_skp(torch.cat([out, x1], dim=1))
-        return out
->>>>>>> ba6ce9aa78f1ce5d1680af52e2bd8d4b1be62ae9
 
 @BACKBONE.register("swin_b")
 def swin_base_patch4_window7_224(pretrained='./pretrained/swin_base_patch4_window7_224_22k.pth', convert_weights=True, img_size=224,drop_rate=0.0, attn_drop_rate=0.0, drop_path_rate=0., **kwargs):

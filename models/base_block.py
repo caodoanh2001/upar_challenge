@@ -36,6 +36,12 @@ class LinearClassifier(BaseClassifier):
 
     def forward(self, feature, label=None):
 
+<<<<<<< HEAD
+        x = self.logits(feature)
+
+        classifier_n = F.normalize(self.logits[0].weight, dim=1)
+        feat_n = F.normalize(feature, dim=1)
+=======
         if len(feature.shape) == 3:  # for vit (bt, nattr, c)
 
             bt, hw, c = feature.shape
@@ -51,6 +57,7 @@ class LinearClassifier(BaseClassifier):
 
         classifier_n = F.normalize(self.logits[0].weight, dim=1)
         feat_n = F.normalize(feat, dim=1)
+>>>>>>> ba6ce9aa78f1ce5d1680af52e2bd8d4b1be62ae9
 
         cosine = feat_n @ classifier_n.t()
 
@@ -105,9 +112,12 @@ class FeatClassifier(nn.Module):
         self.classifier = classifier
         self.bn_wd = bn_wd
 
+<<<<<<< HEAD
+=======
         self.flat = nn.Flatten()
         self.proj = nn.Linear(1024 * 8 * 4, 512)
 
+>>>>>>> ba6ce9aa78f1ce5d1680af52e2bd8d4b1be62ae9
     def fresh_params(self):
         return self.classifier.fresh_params(self.bn_wd)
 
@@ -121,4 +131,8 @@ class FeatClassifier(nn.Module):
     def forward(self, x, label=None):
         feat_map = self.backbone(x)
         logits, feat = self.classifier(feat_map, label)
+<<<<<<< HEAD
+        return logits, feat
+=======
         return logits, feat, self.proj(self.flat(feat_map))
+>>>>>>> ba6ce9aa78f1ce5d1680af52e2bd8d4b1be62ae9

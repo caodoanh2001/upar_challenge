@@ -36,13 +36,20 @@ def batch_trainer(cfg, args, epoch, model, model_ema, train_loader, criterion, o
     imgname_list = []
     loss_mtr_list = []
 
+<<<<<<< HEAD
+=======
     run_mse_loss = 0.
+>>>>>>> ba6ce9aa78f1ce5d1680af52e2bd8d4b1be62ae9
     with tqdm(desc='Epoch %d - Training' % epoch, unit='it', total=len(train_loader)) as pbar:
         for step, (imgs, gt_label, imgname) in enumerate(train_loader):
             iter_num = epoch * len(train_loader) + step
 
             batch_time = time.time()
             imgs, gt_label = imgs.cuda(), gt_label.cuda()
+<<<<<<< HEAD
+            train_logits, _ = model(imgs, gt_label)
+
+=======
             train_logits, _, feat_map = model(imgs, gt_label)
 
             scores = []
@@ -57,6 +64,7 @@ def batch_trainer(cfg, args, epoch, model, model_ema, train_loader, criterion, o
 
             mse_loss = torch.nn.functional.mse_loss(scores.reshape(-1,1), t_gt_label.reshape(-1,1))
             run_mse_loss += mse_loss.item()
+>>>>>>> ba6ce9aa78f1ce5d1680af52e2bd8d4b1be62ae9
             loss_list, loss_mtr = criterion(train_logits, gt_label)
 
             train_loss = 0
@@ -64,8 +72,11 @@ def batch_trainer(cfg, args, epoch, model, model_ema, train_loader, criterion, o
             for i, l in enumerate(loss_w):
                 train_loss += loss_list[i] * l
 
+<<<<<<< HEAD
+=======
             train_loss += mse_loss
 
+>>>>>>> ba6ce9aa78f1ce5d1680af52e2bd8d4b1be62ae9
             optimizer.zero_grad()
             train_loss.backward()
 
@@ -102,7 +113,11 @@ def batch_trainer(cfg, args, epoch, model, model_ema, train_loader, criterion, o
 
             imgname_list.append(imgname)
 
+<<<<<<< HEAD
+            pbar.set_postfix(loss=loss_meter.avg)
+=======
             pbar.set_postfix(loss=loss_meter.avg, mse_loss=run_mse_loss / (step + 1))
+>>>>>>> ba6ce9aa78f1ce5d1680af52e2bd8d4b1be62ae9
             pbar.update()
 
 
@@ -128,7 +143,10 @@ def valid_trainer(cfg, args, epoch, model, valid_loader, criterion, loss_w=[1, ]
     imgname_list = []
     loss_mtr_list = []
 
+<<<<<<< HEAD
+=======
     run_mse_loss = 0.
+>>>>>>> ba6ce9aa78f1ce5d1680af52e2bd8d4b1be62ae9
     with tqdm(desc='Epoch %d - Validation' % epoch, unit='it', total=len(valid_loader)) as pbar:
         with torch.no_grad():
             for step, (imgs, gt_label, imgname) in enumerate(valid_loader):
@@ -136,14 +154,20 @@ def valid_trainer(cfg, args, epoch, model, valid_loader, criterion, loss_w=[1, ]
                 gt_label = gt_label.cuda()
                 gt_list.append(gt_label.cpu().numpy())
                 gt_label[gt_label == -1] = 0
+<<<<<<< HEAD
+                valid_logits, _ = model(imgs, gt_label)
+=======
                 valid_logits, feat, feat_map = model(imgs, gt_label)
 
+>>>>>>> ba6ce9aa78f1ce5d1680af52e2bd8d4b1be62ae9
 
                 loss_list, loss_mtr = criterion(valid_logits, gt_label)
                 valid_loss = 0
                 for i, l in enumerate(loss_list):
                     valid_loss += loss_w[i] * l
 
+<<<<<<< HEAD
+=======
                 scores = []
                 for text_feat in text_feats:
                     b_text_feat = text_feat.unsqueeze(0).repeat(imgs.shape[0], 1)
@@ -157,6 +181,7 @@ def valid_trainer(cfg, args, epoch, model, valid_loader, criterion, loss_w=[1, ]
                 mse_loss = torch.nn.functional.mse_loss(scores.reshape(-1,1), t_gt_label.reshape(-1,1))
                 run_mse_loss += mse_loss.item()
 
+>>>>>>> ba6ce9aa78f1ce5d1680af52e2bd8d4b1be62ae9
                 valid_probs, valid_logits = logits4pred(criterion, valid_logits)
                 preds_probs.append(valid_probs.cpu().numpy())
                 preds_logits.append(valid_logits.cpu().numpy())
@@ -170,7 +195,11 @@ def valid_trainer(cfg, args, epoch, model, valid_loader, criterion, loss_w=[1, ]
                 torch.cuda.synchronize()
 
                 imgname_list.append(imgname)
+<<<<<<< HEAD
+                pbar.set_postfix(loss=loss_meter.avg)
+=======
                 pbar.set_postfix(loss=loss_meter.avg, mse_loss=run_mse_loss / (step + 1))
+>>>>>>> ba6ce9aa78f1ce5d1680af52e2bd8d4b1be62ae9
                 pbar.update()
 
     valid_loss = loss_meter.avg
@@ -182,4 +211,8 @@ def valid_trainer(cfg, args, epoch, model, valid_loader, criterion, loss_w=[1, ]
     preds_probs = np.concatenate(preds_probs, axis=0)
     preds_logits = np.concatenate(preds_logits, axis=0)
 
+<<<<<<< HEAD
     return valid_loss, gt_label, preds_probs, imgname_list, preds_logits, loss_mtr_list
+=======
+    return valid_loss, gt_label, preds_probs, imgname_list, preds_logits, loss_mtr_list
+>>>>>>> ba6ce9aa78f1ce5d1680af52e2bd8d4b1be62ae9

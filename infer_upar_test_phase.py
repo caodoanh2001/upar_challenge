@@ -17,7 +17,11 @@ from metrics.ml_metrics import get_multilabel_metrics
 from metrics.pedestrian_metrics import get_pedestrian_metrics
 from models.model_ema import ModelEmaV2
 from optim.adamw import AdamW
+<<<<<<< HEAD
+# from scheduler.cosine_lr import CosineLRScheduler
+=======
 from scheduler.cosine_lr import CosineLRScheduler
+>>>>>>> ba6ce9aa78f1ce5d1680af52e2bd8d4b1be62ae9
 from tools.distributed import distribute_bn
 from tools.vis import tb_visualizer_pedes
 import torch
@@ -31,7 +35,11 @@ from models.model_factory import build_loss, build_classifier, build_backbone
 
 from tools.function import get_model_log_path, get_reload_weight, seperate_weight_decay
 from tools.utils import time_str, save_ckpt, ReDirectSTD, set_seed, str2bool, gen_code_archive
+<<<<<<< HEAD
+from models.backbone import swin_transformer2
+=======
 from models.backbone import swin_transformer
+>>>>>>> ba6ce9aa78f1ce5d1680af52e2bd8d4b1be62ae9
 from losses import bceloss, scaledbceloss
 from models import base_block
 from tqdm import tqdm
@@ -62,7 +70,11 @@ def main(cfg, args):
 
     classifier = build_classifier(cfg.CLASSIFIER.NAME)(
         nattr=40,
+<<<<<<< HEAD
+        c_in=2048,
+=======
         c_in=c_output,
+>>>>>>> ba6ce9aa78f1ce5d1680af52e2bd8d4b1be62ae9
         bn=cfg.CLASSIFIER.BN,
         pool=cfg.CLASSIFIER.POOLING,
         scale =cfg.CLASSIFIER.SCALE
@@ -73,6 +85,11 @@ def main(cfg, args):
     if torch.cuda.is_available():
         model = torch.nn.DataParallel(model).cuda()
 
+<<<<<<< HEAD
+    model = get_reload_weight(model_dir, model, pth='/home/compu/doanhbc/upar_challenge/SOLIDER-PersonAttributeRecognition/exp_result/PA100k/swin_b.sm08/img_model/ckpt_max_multi_evavit_swinT.pth')
+
+    model.eval()
+=======
     model = get_reload_weight(model_dir, model, pth='/home/compu/doanhbc/upar_challenge/SOLIDER-PersonAttributeRecognition/exp_result/PA100k/swin_b.sm08/img_model/best_ckpt_max_2023-10-15_10:55:57.pth')
 
     model.eval()
@@ -80,12 +97,17 @@ def main(cfg, args):
     path_list = []
 
     attn_list = []
+>>>>>>> ba6ce9aa78f1ce5d1680af52e2bd8d4b1be62ae9
     f = open('./predictions.csv', 'w')
     f.write('# Image,Age-Young,Age-Adult,Age-Old,Gender-Female,Hair-Length-Short,Hair-Length-Long,Hair-Length-Bald,UpperBody-Length-Short,UpperBody-Color-Black,UpperBody-Color-Blue,UpperBody-Color-Brown,UpperBody-Color-Green,UpperBody-Color-Grey,UpperBody-Color-Orange,UpperBody-Color-Pink,UpperBody-Color-Purple,UpperBody-Color-Red,UpperBody-Color-White,UpperBody-Color-Yellow,UpperBody-Color-Other,LowerBody-Length-Short,LowerBody-Color-Black,LowerBody-Color-Blue,LowerBody-Color-Brown,LowerBody-Color-Green,LowerBody-Color-Grey,LowerBody-Color-Orange,LowerBody-Color-Pink,LowerBody-Color-Purple,LowerBody-Color-Red,LowerBody-Color-White,LowerBody-Color-Yellow,LowerBody-Color-Other,LowerBody-Type-Trousers&Shorts,LowerBody-Type-Skirt&Dress,Accessory-Backpack,Accessory-Bag,Accessory-Glasses-Normal,Accessory-Glasses-Sun,Accessory-Hat\n')
     with torch.no_grad():
         for step, (imgs, imgnames) in enumerate(tqdm(valid_loader)):
             imgs = imgs.cuda()
+<<<<<<< HEAD
+            valid_logits, attns = model(imgs)
+=======
             valid_logits, attns, _ = model(imgs)
+>>>>>>> ba6ce9aa78f1ce5d1680af52e2bd8d4b1be62ae9
 
             valid_probs = torch.sigmoid(valid_logits[0])
 

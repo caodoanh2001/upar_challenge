@@ -5,8 +5,14 @@ os.environ['CUDA_VISIBLE_DEVICES'] = '2'
 import pickle
 
 from dataset.augmentation import get_transform
+<<<<<<< HEAD
+# from dataset.multi_label.coco import COCO14
+from metrics.pedestrian_metrics import get_pedestrian_metrics
+from models.backbone import swin_transformer2
+=======
 from dataset.multi_label.coco import COCO14
 from metrics.pedestrian_metrics import get_pedestrian_metrics
+>>>>>>> ba6ce9aa78f1ce5d1680af52e2bd8d4b1be62ae9
 from models.model_factory import build_backbone, build_classifier
 
 import numpy as np
@@ -15,7 +21,11 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 from configs import cfg, update_config
+<<<<<<< HEAD
+from dataset.pedes_attr.pedes import PedesAttr,PedesAttrPETA
+=======
 from dataset.pedes_attr.pedes import PedesAttr
+>>>>>>> ba6ce9aa78f1ce5d1680af52e2bd8d4b1be62ae9
 from metrics.ml_metrics import get_map_metrics, get_multilabel_metrics
 from models.base_block import FeatClassifier
 # from models.model_factory import model_dict, classifier_dict
@@ -34,6 +44,12 @@ def main(cfg, args):
     train_tsfm, valid_tsfm = get_transform(cfg)
     print(valid_tsfm)
 
+<<<<<<< HEAD
+    train_set = PedesAttrPETA(cfg=cfg, split=cfg.DATASET.TRAIN_SPLIT, transform=valid_tsfm,
+                            target_transform=cfg.DATASET.TARGETTRANSFORM)
+    valid_set = PedesAttrPETA(cfg=cfg, split=cfg.DATASET.VAL_SPLIT, transform=valid_tsfm,
+                            target_transform=cfg.DATASET.TARGETTRANSFORM)
+=======
     if cfg.DATASET.TYPE == 'multi_label':
         train_set = COCO14(cfg=cfg, split=cfg.DATASET.TRAIN_SPLIT, transform=train_tsfm,
                            target_transform=cfg.DATASET.TARGETTRANSFORM)
@@ -45,6 +61,7 @@ def main(cfg, args):
                               target_transform=cfg.DATASET.TARGETTRANSFORM)
         valid_set = PedesAttr(cfg=cfg, split=cfg.DATASET.VAL_SPLIT, transform=valid_tsfm,
                               target_transform=cfg.DATASET.TARGETTRANSFORM)
+>>>>>>> ba6ce9aa78f1ce5d1680af52e2bd8d4b1be62ae9
 
 
     train_loader = DataLoader(
@@ -59,7 +76,11 @@ def main(cfg, args):
         dataset=valid_set,
         batch_size=cfg.TRAIN.BATCH_SIZE,
         shuffle=False,
+<<<<<<< HEAD
+        num_workers=64,
+=======
         num_workers=4,
+>>>>>>> ba6ce9aa78f1ce5d1680af52e2bd8d4b1be62ae9
         pin_memory=True,
     )
 
@@ -72,7 +93,11 @@ def main(cfg, args):
 
     classifier = build_classifier(cfg.CLASSIFIER.NAME)(
         nattr=train_set.attr_num,
+<<<<<<< HEAD
+        c_in=2048,
+=======
         c_in=c_output,
+>>>>>>> ba6ce9aa78f1ce5d1680af52e2bd8d4b1be62ae9
         bn=cfg.CLASSIFIER.BN,
         pool=cfg.CLASSIFIER.POOLING,
         scale =cfg.CLASSIFIER.SCALE
@@ -83,7 +108,11 @@ def main(cfg, args):
     if torch.cuda.is_available():
         model = torch.nn.DataParallel(model).cuda()
 
+<<<<<<< HEAD
+    model = get_reload_weight(model_dir, model, pth='/home/compu/doanhbc/upar_challenge/SOLIDER-PersonAttributeRecognition/exp_result/PA100k/swin_b.sm08/img_model/best_ckpt_max_multi_evavit_swinT_peta.pth')
+=======
     model = get_reload_weight(model_dir, model, pth='/mnt/data1/jiajian/code/Rethinking_of_PAR/exp_result/coco14/resnet101.sgd.bt32/img_model/ckpt_max_2021-11-28_10:14:50.pth')
+>>>>>>> ba6ce9aa78f1ce5d1680af52e2bd8d4b1be62ae9
 
     model.eval()
     preds_probs = []
@@ -92,7 +121,11 @@ def main(cfg, args):
 
     attn_list = []
     with torch.no_grad():
+<<<<<<< HEAD
+        for step, (imgs, gt_label, imgname) in enumerate(tqdm(valid_loader)):
+=======
         for step, (imgs, gt_label, imgname) in enumerate(tqdm(train_loader)):
+>>>>>>> ba6ce9aa78f1ce5d1680af52e2bd8d4b1be62ae9
             imgs = imgs.cuda()
             gt_label = gt_label.cuda()
             valid_logits, attns = model(imgs, gt_label)
