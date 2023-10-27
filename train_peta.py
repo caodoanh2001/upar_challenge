@@ -171,7 +171,6 @@ def main(cfg, args):
         model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.local_rank])
     else:
         model = torch.nn.DataParallel(model)
-    model.load_state_dict(torch.load(os.path.join(model_dir, f'best_ckpt_max_multi_evavit_swinT_peta.pth'))["state_dicts"])
 
     # model.load_state_dict(ckpt["state_dicts"], strict=False)
     for param in model.parameters(): param.requires_grad = False

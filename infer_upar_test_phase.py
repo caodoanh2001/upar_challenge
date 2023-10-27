@@ -47,8 +47,8 @@ def main(cfg, args):
     _, valid_tsfm = get_transform(cfg)
     print(valid_tsfm)
 
-    valid_set = PedesAttrUPARInferTestPhase(cfg=cfg, csv_file='/data3/doanhbc/upar/phase2/submission_templates_test/task1/predictions.csv', transform=valid_tsfm,
-                              root_path='/data3/doanhbc/upar/phase2/', target_transform=cfg.DATASET.TARGETTRANSFORM)
+    valid_set = PedesAttrUPARInferTestPhase(cfg=cfg, csv_file='./predictions.csv', transform=valid_tsfm,
+                              root_path=cfg.PHASE2_ROOT_PATH, target_transform=cfg.DATASET.TARGETTRANSFORM)
 
     valid_loader = DataLoader(
         dataset=valid_set,
@@ -58,8 +58,8 @@ def main(cfg, args):
         pin_memory=True,
     )
 
+    # Build model
     backbone, c_output = build_backbone(cfg.BACKBONE.TYPE, cfg.BACKBONE.MULTISCALE)
-
     classifier = build_classifier(cfg.CLASSIFIER.NAME)(
         nattr=40,
         c_in=2048,
@@ -67,14 +67,13 @@ def main(cfg, args):
         pool=cfg.CLASSIFIER.POOLING,
         scale =cfg.CLASSIFIER.SCALE
     )
-
     model = FeatClassifier(backbone, classifier)
 
     if torch.cuda.is_available():
         model = torch.nn.DataParallel(model).cuda()
 
-    model = get_reload_weight(model_dir, model, pth='/home/compu/doanhbc/upar_challenge/SOLIDER-PersonAttributeRecognition/exp_result/PA100k/swin_b.sm08/img_model/ckpt_max_multi_evavit_swinT_retrain.pth')
-
+    model = get_reload_weight(model_dir, model, pth='./checkpoints/best_model.pth')
+    # Write results
     model.eval()
     f = open('./predictions.csv', 'w')
     f.write('# Image,Age-Young,Age-Adult,Age-Old,Gender-Female,Hair-Length-Short,Hair-Length-Long,Hair-Length-Bald,UpperBody-Length-Short,UpperBody-Color-Black,UpperBody-Color-Blue,UpperBody-Color-Brown,UpperBody-Color-Green,UpperBody-Color-Grey,UpperBody-Color-Orange,UpperBody-Color-Pink,UpperBody-Color-Purple,UpperBody-Color-Red,UpperBody-Color-White,UpperBody-Color-Yellow,UpperBody-Color-Other,LowerBody-Length-Short,LowerBody-Color-Black,LowerBody-Color-Blue,LowerBody-Color-Brown,LowerBody-Color-Green,LowerBody-Color-Grey,LowerBody-Color-Orange,LowerBody-Color-Pink,LowerBody-Color-Purple,LowerBody-Color-Red,LowerBody-Color-White,LowerBody-Color-Yellow,LowerBody-Color-Other,LowerBody-Type-Trousers&Shorts,LowerBody-Type-Skirt&Dress,Accessory-Backpack,Accessory-Bag,Accessory-Glasses-Normal,Accessory-Glasses-Sun,Accessory-Hat\n')
@@ -82,9 +81,7 @@ def main(cfg, args):
         for step, (imgs, imgnames) in enumerate(tqdm(valid_loader)):
             imgs = imgs.cuda()
             valid_logits, attns = model(imgs)
-
             valid_probs = torch.sigmoid(valid_logits[0])
-
             for imgname, valid_prob in zip(imgnames, valid_probs):
                 write_score = ','.join(list(map(str, valid_prob.tolist())))
                 f.write(imgname + ',' + write_score + '\n')
@@ -97,7 +94,7 @@ def argument_parser():
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     parser.add_argument(
-        "--cfg", default='./configs/pa100k.yaml', help="decide which cfg to use", type=str,
+        "--cfg", default='./configs/upar.yaml', help="decide which cfg to use", type=str,
     )
     parser.add_argument("--debug", type=str2bool, default="true")
 

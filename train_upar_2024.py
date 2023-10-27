@@ -52,8 +52,8 @@ def main(cfg, args):
     model_dir, log_dir = get_model_log_path(exp_dir, cfg.BACKBONE.TYPE+cfg.NAME)
 
     timestamp = time_str()
-    stdout_file = os.path.join(log_dir, f'stdout_multi_evavit_swinT_retrain.txt')
-    save_model_path = os.path.join(model_dir, f'ckpt_max_multi_evavit_swinT_retrain.pth')
+    stdout_file = os.path.join(log_dir, f'upar_log.txt')
+    save_model_path = os.path.join(model_dir, f'best_model.pth')
 
     visdom = None
     if cfg.VIS.VISDOM:
@@ -100,19 +100,11 @@ def main(cfg, args):
     if args.local_rank == 0:
         print(train_tsfm)
 
-    if cfg.DATASET.TYPE == 'pedes':
-        train_set = PedesAttrUPAR(cfg=cfg, csv_file='/data3/doanhbc/upar/annotations/phase1/train/train.csv', transform=train_tsfm,
-                              root_path='/data3/doanhbc/upar/', target_transform=cfg.DATASET.TARGETTRANSFORM)
+    train_set = PedesAttrUPAR(cfg=cfg, csv_file=cfg.PHASE1_ROOT_PATH + '/train/train.csv', transform=train_tsfm,
+                            root_path=cfg.ROOT_PATH, target_transform=cfg.DATASET.TARGETTRANSFORM)
 
-        valid_set = PedesAttrUPAR(cfg=cfg, csv_file='/data3/doanhbc/upar/phase2/annotations/val_gt/val_gt.csv', transform=valid_tsfm,
-                              root_path='/data3/doanhbc/upar/', target_transform=cfg.DATASET.TARGETTRANSFORM)
-    
-    elif cfg.DATASET.TYPE == 'multi_label':
-        train_set = COCO14(cfg=cfg, split=cfg.DATASET.TRAIN_SPLIT, transform=train_tsfm,
-                           target_transform=cfg.DATASET.TARGETTRANSFORM)
-
-        valid_set = COCO14(cfg=cfg, split=cfg.DATASET.VAL_SPLIT, transform=valid_tsfm,
-                           target_transform=cfg.DATASET.TARGETTRANSFORM)
+    valid_set = PedesAttrUPAR(cfg=cfg, csv_file=cfg.PHASE2_ROOT_PATH + '/annotations/val_gt/val_gt.csv', transform=valid_tsfm,
+                            root_path=cfg.ROOT_PATH, target_transform=cfg.DATASET.TARGETTRANSFORM)
     if args.distributed:
         train_sampler = torch.utils.data.distributed.DistributedSampler(train_set)
     else:
@@ -172,7 +164,6 @@ def main(cfg, args):
     else:
         model = torch.nn.DataParallel(model)
 
-    model.load_state_dict(torch.load(os.path.join(model_dir, f'best_ckpt_max_multi_evavit_swinT_7174.pth'))["state_dicts"])
     model_ema = None
     if cfg.TRAIN.EMA.ENABLE:
         # Important to create EMA model after cuda(), DP wrapper, and AMP but before SyncBN and DDP wrapper
@@ -441,7 +432,7 @@ def argument_parser():
 
     parser.add_argument(
         "--cfg", help="decide which cfg to use", type=str,
-        default="./configs/pa100k.yaml",
+        default="./configs/upar.yaml",
 
     )
     parser.add_argument("--debug", type=str2bool, default="true")
