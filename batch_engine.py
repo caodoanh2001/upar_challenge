@@ -19,8 +19,8 @@ def logits4pred(criterion, logits_list):
 
     return probs, logits
 
-text_feats = np.load("/home/compu/doanhbc/upar_challenge/SOLIDER-PersonAttributeRecognition/feat_list_attributes.npy")
-text_feats = torch.from_numpy(text_feats).to('cuda')
+#text_feats = np.load("/home/compu/doanhbc/upar_challenge/SOLIDER-PersonAttributeRecognition/feat_list_attributes.npy")
+#text_feats = torch.from_numpy(text_feats).to('cuda')
 
 def batch_trainer(cfg, args, epoch, model, model_ema, train_loader, criterion, optimizer, loss_w=[1, ], scheduler=None, tb_writer=None):
     model.train()

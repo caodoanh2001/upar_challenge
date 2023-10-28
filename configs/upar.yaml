@@ -9,9 +9,9 @@ DATASET:
   LABEL: 'eval'
   HEIGHT: 256
   WIDTH: 128
-  PHASE1_ROOT_PATH: '/data3/doanhbc/upar/phase1/annotations/phase1/'
-  PHASE2_ROOT_PATH: '/data3/doanhbc/upar/phase2/'
-  ROOT_PATH: '/data3/doanhbc/upar/'
+  PHASE1_ROOT_PATH: '/home/data/phase1/annotations/phase1/'
+  PHASE2_ROOT_PATH: '/home/data/phase2/'
+  ROOT_PATH: '/home/data/'
 
 RELOAD:
   TYPE: False
