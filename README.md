@@ -24,7 +24,7 @@ data
 
 ### 2. Prepare docker image
 
-Download docker image [here](https://).
+Download docker image [here](https://drive.google.com/file/d/1sht0y_6lhzP1IAwUb_CRNtuZom6JZnkx/view).
 
 Run the below command to load the docker image:
 
@@ -48,7 +48,7 @@ Then, follow the step 3 for reproducing the results, and step 4 for training.
 
 ### 3. Inference for testing dataset in phase 2:
 
-Download our best checkpoint [here](https://) (`best_model.pth`). Place it under `checkpoints` folder (we already put it in the docker image).
+Download our best checkpoint [here](https://drive.google.com/file/d/1YCHeRhEPcyb6fD9byi3flNFSQDsY2qA0/view?usp=drive_link) (`best_model.pth`). Place it under `checkpoints` folder (we already put it in the docker image).
 
 Run the below file for inference:
 
