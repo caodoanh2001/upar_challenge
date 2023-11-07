@@ -100,11 +100,11 @@ def main(cfg, args):
     if args.local_rank == 0:
         print(train_tsfm)
 
-    train_set = PedesAttrUPAR(cfg=cfg, csv_file=cfg.DATASET.PHASE1_ROOT_PATH + '/train/train.csv', transform=train_tsfm,
-                            root_path=cfg.DATASET.ROOT_PATH, target_transform=cfg.DATASET.TARGETTRANSFORM)
+    train_set = PedesAttrUPAR(cfg=cfg, csv_file=cfg.PHASE1_ROOT_PATH + '/train/train.csv', transform=train_tsfm,
+                            root_path=cfg.ROOT_PATH, target_transform=cfg.DATASET.TARGETTRANSFORM)
 
-    valid_set = PedesAttrUPAR(cfg=cfg, csv_file=cfg.DATASET.PHASE2_ROOT_PATH + '/annotations/val_gt/val_gt.csv', transform=valid_tsfm,
-                            root_path=cfg.DATASET.ROOT_PATH, target_transform=cfg.DATASET.TARGETTRANSFORM)
+    valid_set = PedesAttrUPAR(cfg=cfg, csv_file=cfg.PHASE2_ROOT_PATH + '/annotations/val_gt/val_gt.csv', transform=valid_tsfm,
+                            root_path=cfg.ROOT_PATH, target_transform=cfg.DATASET.TARGETTRANSFORM)
     if args.distributed:
         train_sampler = torch.utils.data.distributed.DistributedSampler(train_set)
     else:
