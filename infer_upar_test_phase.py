@@ -47,9 +47,9 @@ def main(cfg, args):
     _, valid_tsfm = get_transform(cfg)
     print(valid_tsfm)
 
-    template_submission_csv = os.path.join(cfg.PHASE2_ROOT_PATH, 'submission_templates_test', 'predictions.csv')
+    template_submission_csv = os.path.join(cfg.DATASET.PHASE2_ROOT_PATH, 'submission_templates_test/task1', 'predictions.csv')
     valid_set = PedesAttrUPARInferTestPhase(cfg=cfg, csv_file=template_submission_csv, transform=valid_tsfm,
-                              root_path=cfg.PHASE2_ROOT_PATH, target_transform=cfg.DATASET.TARGETTRANSFORM)
+                              root_path=cfg.DATASET.PHASE2_ROOT_PATH, target_transform=cfg.DATASET.TARGETTRANSFORM)
 
     valid_loader = DataLoader(
         dataset=valid_set,
