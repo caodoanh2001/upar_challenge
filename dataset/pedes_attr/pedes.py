@@ -11,7 +11,7 @@ import pandas as pd
 
 class PedesAttr(data.Dataset):
 
-    def __init__(self, cfg, split, transform=None, target_transform=None, idx=None):
+    def __init__(self, cfg, split, transform=None, target_transform=None, idx=None, root_path=None):
 
         assert cfg.DATASET.NAME in ['PETA', 'PA100k', 'RAP', 'RAP2'], \
             f'dataset name {cfg.DATASET.NAME} is not exist'
@@ -53,7 +53,8 @@ class PedesAttr(data.Dataset):
         self.transform = transform
         self.target_transform = target_transform
 
-        self.root_path = f"/data3/doanhbc/upar/PA100k/release_data/release_data" # dataset_info.root
+        self.root_path = root_path
+        # f"/data3/doanhbc/upar/PA100k/release_data/release_data" # dataset_info.root
 
         if self.target_transform:
             self.attr_num = len(self.target_transform)
@@ -178,12 +179,16 @@ class PedesAttrPETA(data.Dataset):
 
 class PedesAttrUPAR(data.Dataset):
 
-    def __init__(self, cfg, csv_file, transform=None, target_transform=None, idx=None, root_path=None):
+    def __init__(self, cfg, csv_file, transform=None, target_transform=None, idx=None, root_path=None, train=None):
 
         self.dataset = cfg.DATASET.NAME
         self.transform = transform
         self.data = pd.read_csv(csv_file)
         self.root_path = root_path
+        if train:
+            self.data.reset_index(inplace=True)
+            self.data = pd.DataFrame(self.data.values[1:], columns=["# image"] + self.data.columns.to_list()[1:])
+        
         self.label = self.data.values[:, 1:].astype(np.float32)
         self.attr_num = self.label.shape[-1]
         self.eval_attr_num = self.attr_num
@@ -192,7 +197,7 @@ class PedesAttrUPAR(data.Dataset):
 
         # imgname, gt_label, imgidx = self.img_id[index], self.label[index], self.img_idx[index]
 
-        imgname = self.data.iloc[index]['file_name']
+        imgname = self.data.iloc[index]['# image']
         gt_label = self.label[index]
 
         imgpath = os.path.join(self.root_path, imgname)
