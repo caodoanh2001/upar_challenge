@@ -1,4 +1,6 @@
-## Channel-Aware Cross-Fused Transformer-style Networks (C$^2$T-Net)
+## Channel-Aware Cross-Fused Transformer-style Networks (C2T-Net)
+
+<img src="https://caodoanh2001.github.io/assets/img/upar-certificate.jpg" data-canonical-src="https://caodoanh2001.github.io/assets/img/upar-certificate.jpg" width="750" height="500" />
 
 Doanh C. Bui, Thinh V. Le and Hung Ba Ngo
 
