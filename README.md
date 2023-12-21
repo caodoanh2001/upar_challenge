@@ -70,3 +70,15 @@ CUDA_VISIBLE_DEVICES=0 bash run.sh
 ```
 
 The checkpoints and logs would be saved at `exp_results/upar/`
+
+If this repository proves beneficial for your projects, we kindly request acknowledgment through proper citation:
+```
+@InProceedings{Bui_2024_WACV,
+    author    = {Bui, Doanh C. and Le, Thinh V. and Ngo, Ba Hung},
+    title     = {C2T-Net: Channel-Aware Cross-Fused Transformer-Style Networks for Pedestrian Attribute Recognition},
+    booktitle = {Proceedings of the IEEE/CVF Winter Conference on Applications of Computer Vision (WACV) Workshops},
+    month     = {January},
+    year      = {2024},
+    pages     = {351-358}
+}
+```
