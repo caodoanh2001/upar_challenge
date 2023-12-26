@@ -1,5 +1,7 @@
 ## Channel-Aware Cross-Fused Transformer-style Networks (C2T-Net)
 
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/c2t-net-channel-aware-cross-fused-transformer/pedestrian-attribute-recognition-on-pa-100k)](https://paperswithcode.com/sota/pedestrian-attribute-recognition-on-pa-100k?p=c2t-net-channel-aware-cross-fused-transformer)
+
 <img src="https://caodoanh2001.github.io/assets/img/upar-certificate.jpg" data-canonical-src="https://caodoanh2001.github.io/assets/img/upar-certificate.jpg" width="750" height="500" />
 
 Doanh C. Bui, Thinh V. Le and Hung Ba Ngo
